@@ -1,68 +1,92 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useCallback } from "react";
 import { AnimatePresence, motion } from "framer-motion";
-import { Zap, PlayCircle, Settings2 } from "lucide-react";
-import { useRSVPReader } from "@/hooks/use-rsvp-reader";
-import ReaderCanvas from "@/components/ReaderCanvas";
-import WarpBackground from "@/components/WarpBackground";
+import { Zap, PlayCircle, Settings2, Upload, FileText } from "lucide-react";
+import { useRSVP } from "@/hooks/useRSVP"; // Patched with ORP
+import ReaderCanvas from "@/components/ReaderCanvas"; // Redshift HUD
+import WarpBackground from "@/components/WarpBackground"; // Redshift Warp
 import { Button } from "@/components/ui/button";
 import { Slider } from "@/components/ui/slider";
+import { extractTextFromPdf } from "@/lib/pdf-utils"; // Cogniread Feature
 
 export default function Home() {
   const [text, setText] = useState("");
-  const [frames, setFrames] = useState<any[]>([]);
-  const [loading, setLoading] = useState(false);
   const [wpm, setWpm] = useState(600);
-  const [isReaderActive, setIsReaderActive] = useState(false);
+  const [isPlaying, setIsPlaying] = useState(false);
+  const [isReaderOpen, setIsReaderOpen] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
 
-  // Hook handles engine mapping
-  const reader = useRSVPReader(frames);
+  // Hook handles Logic + ORP Calculation
+  const { currentWord, orpIndex, progress, totalWords, index, setIndex } = useRSVP({
+    text,
+    wpm,
+    isPlaying: isPlaying && isReaderOpen,
+    onComplete: () => setIsPlaying(false),
+  });
 
-  const handleIngest = async () => {
-    if (!text.trim()) return;
-    setLoading(true);
-    try {
-      const res = await fetch("/api/ingest", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ text, wpm }),
-      });
-      const data = await res.json();
-      if (data.frames) {
-        setFrames(data.frames);
-        reader.restart(); // Reset hook state
-        setIsReaderActive(true);
-        reader.setIsPlaying(true);
+  // Derived Control Handlers (Mapping to Redshift Props)
+  const togglePlay = useCallback(() => setIsPlaying((p) => !p), []);
+  const closeReader = useCallback(() => {
+    setIsPlaying(false);
+    setIsReaderOpen(false);
+  }, []);
+  const restartReader = useCallback(() => {
+    setIndex(0);
+    setIsPlaying(true);
+  }, [setIndex]);
+  const seekReader = useCallback((forward: boolean) => {
+    setIsPlaying(false);
+    setIndex((prev) => Math.max(0, Math.min(totalWords - 1, prev + (forward ? 1 : -1))));
+  }, [setIndex, totalWords]);
+
+  // Handle File Upload (Cogniread Logic)
+  const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    if (file.type === "application/pdf") {
+      setIsLoading(true);
+      try {
+        const extracted = await extractTextFromPdf(file);
+        setText(extracted);
+      } catch (err) {
+        alert("Failed to read PDF");
+      } finally {
+        setIsLoading(false);
       }
-    } catch (err) {
-      console.error(err);
-      alert("Error processing text.");
-    } finally {
-      setLoading(false);
+    } else {
+      // Plain text
+      const reader = new FileReader();
+      reader.onload = (ev) => {
+        setText(ev.target?.result as string);
+      };
+      reader.readAsText(file);
     }
   };
 
-  const closeReader = () => {
-    reader.setIsPlaying(false);
-    setIsReaderActive(false);
+  const handleIngest = () => {
+    if (!text.trim()) return;
+    setIsReaderOpen(true);
+    setIsPlaying(true);
+    setIndex(0);
   };
 
   // Keyboard Shortcuts
   const handleKeyDown = (e: React.KeyboardEvent) => {
-    if (isReaderActive) {
+    if (isReaderOpen) {
       if (e.code === "Space") {
         e.preventDefault();
-        reader.togglePlay();
+        togglePlay();
       }
-      if (e.code === "ArrowLeft") reader.seek(false);
-      if (e.code === "ArrowRight") reader.seek(true);
+      if (e.code === "ArrowLeft") seekReader(false);
+      if (e.code === "ArrowRight") seekReader(true);
       if (e.code === "Escape") closeReader();
     }
   };
 
   // Dynamic Warp Speed Logic
-  const warpSpeed = isReaderActive && reader.isPlaying ? (wpm / 100) : 0.2;
+  const warpSpeed = isReaderOpen && isPlaying ? (wpm / 100) : 0.2;
 
   return (
     <div
@@ -73,17 +97,20 @@ export default function Home() {
       <WarpBackground speed={warpSpeed} />
 
       <AnimatePresence mode="wait">
-        {isReaderActive ? (
+        {isReaderOpen ? (
           <ReaderCanvas
             key="reader"
-            frames={frames}
-            isPlaying={reader.isPlaying}
-            onTogglePlay={reader.togglePlay}
+            currentWord={currentWord}
+            orpIndex={orpIndex}
+            isPlaying={isPlaying}
+            onTogglePlay={togglePlay}
             onExit={closeReader}
-            onRestart={reader.restart}
-            onSeek={reader.seek}
-            progress={reader.progress}
+            onRestart={restartReader}
+            onSeek={seekReader}
+            progress={progress}
             wpmConfig={wpm}
+            totalWords={totalWords}
+            currentIndex={index}
           />
         ) : (
           /* Landing Page Content */
@@ -109,14 +136,14 @@ export default function Home() {
                 </div>
               </div>
 
-              <div className="flex gap-12 text-xs text-gray-500 font-mono uppercase tracking-widest">
+              <div className="flex gap-12 text-xs text-gray-500 font-mono uppercase tracking-widest hidden md:flex">
                 <div className="flex flex-col items-center gap-1">
                   <span className="text-white font-bold">ORP</span>
                   <span>Technology</span>
                 </div>
                 <div className="flex flex-col items-center gap-1">
-                  <span className="text-white font-bold">NLP</span>
-                  <span>Pacing</span>
+                  <span className="text-white font-bold">PDF</span>
+                  <span>Ingestion</span>
                 </div>
                 <div className="flex flex-col items-center gap-1">
                   <span className="text-white font-bold">1200+</span>
@@ -134,12 +161,19 @@ export default function Home() {
                     <span className="w-1.5 h-1.5 bg-redshift-red rounded-full animate-pulse shadow-[0_0_10px_#FF3131]" />
                     Data Input Source
                   </label>
-                  <button
-                    onClick={() => setText("")}
-                    className="text-[10px] uppercase tracking-widest text-gray-600 hover:text-redshift-red transition-colors"
-                  >
-                    [ Clear Buffer ]
-                  </button>
+                  <div className="flex gap-4">
+                    <label className="text-[10px] uppercase tracking-widest text-gray-600 hover:text-redshift-red transition-colors cursor-pointer flex items-center gap-1">
+                      <Upload className="w-3 h-3" />
+                      [ Upload PDF/TXT ]
+                      <input type="file" onChange={handleFileUpload} className="hidden" accept=".txt,.pdf" />
+                    </label>
+                    <button
+                      onClick={() => setText("")}
+                      className="text-[10px] uppercase tracking-widest text-gray-600 hover:text-redshift-red transition-colors"
+                    >
+                      [ Clear Buffer ]
+                    </button>
+                  </div>
                 </div>
 
                 <div className="relative">
@@ -147,9 +181,17 @@ export default function Home() {
                   <textarea
                     value={text}
                     onChange={(e) => setText(e.target.value)}
-                    placeholder="PASTE TEXT SEQUENCE HERE // SYSTEM WILL ANALYZE STRUCTURE..."
+                    placeholder="PASTE TEXT SEQUENCE HERE... OR UPLOAD PDF"
                     className="w-full h-[500px] bg-black/40 backdrop-blur-md border border-white/10 rounded-lg p-8 text-gray-300 font-mono text-sm leading-relaxed resize-none focus:outline-none focus:border-redshift-red/50 focus:ring-1 focus:ring-redshift-red/50 transition-all placeholder:text-gray-800 shadow-xl"
                   />
+                  {isLoading && (
+                    <div className="absolute inset-0 bg-black/80 flex items-center justify-center backdrop-blur-sm rounded-lg">
+                      <div className="flex flex-col items-center gap-2 text-redshift-red animate-pulse">
+                        <FileText className="w-8 h-8" />
+                        <span className="text-xs font-mono uppercase tracking-widest">Processing Data Stream...</span>
+                      </div>
+                    </div>
+                  )}
                   {/* Corner Decorators */}
                   <div className="absolute top-0 left-0 w-4 h-4 border-t border-l border-white/20 rounded-tl-lg" />
                   <div className="absolute bottom-0 right-0 w-4 h-4 border-b border-r border-white/20 rounded-br-lg" />
@@ -191,21 +233,17 @@ export default function Home() {
                   variant="destructive"
                   className="w-full h-24 text-xl font-bold tracking-widest shadow-[0_0_30px_rgba(255,49,49,0.2)] hover:shadow-[0_0_60px_rgba(255,49,49,0.5)] transition-all bg-redshift-red hover:bg-[#ff4444] border-none group relative overflow-hidden"
                   onClick={handleIngest}
-                  disabled={!text || loading}
+                  disabled={!text || isLoading}
                 >
                   <div className="absolute inset-0 bg-[linear-gradient(45deg,transparent_25%,rgba(255,255,255,0.2)_50%,transparent_75%)] bg-[length:250%_250%,100%_100%] animate-[shimmer_3s_infinite] pointer-events-none" />
 
-                  {loading ? (
-                    <span className="animate-pulse">INITIALIZING...</span>
-                  ) : (
-                    <div className="flex flex-col items-center gap-1">
-                      <div className="flex items-center gap-2">
-                        <PlayCircle className="w-6 h-6 fill-black text-redshift-red group-hover:scale-110 transition-transform" />
-                        <span>ENGAGE</span>
-                      </div>
-                      <span className="text-[10px] opacity-50 font-mono font-normal">INITIATE SEQUENCE</span>
+                  <div className="flex flex-col items-center gap-1">
+                    <div className="flex items-center gap-2">
+                      <PlayCircle className="w-6 h-6 fill-black text-redshift-red group-hover:scale-110 transition-transform" />
+                      <span>ENGAGE</span>
                     </div>
-                  )}
+                    <span className="text-[10px] opacity-50 font-mono font-normal">INITIATE SEQUENCE</span>
+                  </div>
                 </Button>
 
                 <p className="text-[10px] text-center text-gray-700 font-mono uppercase tracking-widest">
