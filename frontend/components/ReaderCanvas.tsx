@@ -5,7 +5,7 @@ import { Play, Pause, RotateCcw, ChevronRight, ChevronLeft, X, Settings2 } from 
 import { motion } from "framer-motion";
 import { clsx, type ClassValue } from 'clsx';
 import { twMerge } from 'tailwind-merge';
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { ReaderSettingsMenu, type ReaderSettings } from "./ReaderSettings";
 
 function cn(...inputs: ClassValue[]) {
@@ -46,7 +46,13 @@ export default function ReaderCanvas({
 
     // Settings State
     const [isSettingsOpen, setIsSettingsOpen] = useState(false);
-    // Internal settings state removed in favor of props
+
+    // Auto-pause when settings are open
+    useEffect(() => {
+        if (isSettingsOpen && isPlaying) {
+            onTogglePlay();
+        }
+    }, [isSettingsOpen, isPlaying, onTogglePlay]);
 
     // ORP Slicing Logic
     const leftPart = currentWord.substring(0, orpIndex);
