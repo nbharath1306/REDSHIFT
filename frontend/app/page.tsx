@@ -14,8 +14,8 @@ export default function Home() {
     if (!text.trim()) return;
     setLoading(true);
     try {
-      // Connect to the local Django backend (ensure it's running on :8000)
-      const res = await fetch("http://localhost:8000/api/ingest/", {
+      // Connect to the Next.js API Route (Serverless)
+      const res = await fetch("/api/ingest", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ text, wpm: 600 }),
