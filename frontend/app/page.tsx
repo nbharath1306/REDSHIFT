@@ -58,9 +58,9 @@ export default function Home() {
 
       setText(article.content);
       setFileName(article.title);
-    } catch (error) {
+    } catch (error: any) {
       console.error(error);
-      alert("Failed to load URL. It might not be a readable article or is blocked.");
+      alert(`Error: ${error.message || "Failed to load URL"}`);
     } finally {
       setIsLoadingUrl(false);
     }
