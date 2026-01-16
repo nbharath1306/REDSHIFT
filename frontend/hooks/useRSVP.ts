@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback, useRef } from "react";
+import { useState, useEffect, useRef } from "react";
 
 interface RSVPHookProps {
   text: string;
@@ -19,57 +19,79 @@ const calculateORP = (word: string): number => {
 export const useRSVP = ({ text, wpm, isPlaying, onComplete }: RSVPHookProps) => {
   const [index, setIndex] = useState(0);
   const words = useRef<string[]>([]);
-  const timerRef = useRef<NodeJS.Timeout | null>(null);
+
+  // Timing State
+  const requestRef = useRef<number>(0);
+  const lastTimeRef = useRef<number>(0);
+  const accumulatedTimeRef = useRef<number>(0);
 
   // Split text into words only when text changes
   useEffect(() => {
-    // Better splitting: preserving some punctuation logic if needed, but simple whitespace for now
     words.current = text.split(/\s+/).filter((w) => w.length > 0);
     setIndex(0);
+    accumulatedTimeRef.current = 0;
   }, [text]);
 
-  const processTick = useCallback(() => {
-    setIndex((prevIndex) => {
-      const nextIndex = prevIndex + 1;
-      if (nextIndex >= words.current.length) {
-        if (onComplete) onComplete();
-        return prevIndex; // Stop at end
-      }
-      return nextIndex;
-    });
-  }, [onComplete]);
+  const getDelay = (word: string) => {
+    let baseDelay = 60000 / wpm;
+
+    // Pacing Heuristics
+    if (word.length > 8) baseDelay *= 1.3;
+    if (/[,.!?;:]$/.test(word)) baseDelay *= 2.0;
+    if (/\d/.test(word) || /^[A-Z]/.test(word)) baseDelay *= 1.1;
+
+    return baseDelay;
+  };
 
   useEffect(() => {
     if (!isPlaying) {
-      if (timerRef.current) clearTimeout(timerRef.current);
+      lastTimeRef.current = 0;
+      cancelAnimationFrame(requestRef.current);
       return;
     }
 
-    const currentWord = words.current[index] || "";
+    // Logic: 
+    // We start a loop. Inside the loop, we calculate delta time.
+    // We add to accumulator.
+    // If accumulator > delay, we advance index and subtract delay.
 
-    // Base delay (ms per word)
-    let baseDelay = 60000 / wpm;
+    requestRef.current = requestAnimationFrame((time) => {
+      if (lastTimeRef.current === 0) lastTimeRef.current = time;
 
-    // Pacing Heuristics (Redshift Logic)
-    if (currentWord.length > 8) {
-      baseDelay *= 1.3; // Long word slowdown
-    }
-    if (/[,.!?;:]$/.test(currentWord)) {
-      baseDelay *= 2.0; // Punctuation pause
-    }
-    // Numeric data or Capitalized words (light slowdown)
-    if (/\d/.test(currentWord) || /^[A-Z]/.test(currentWord)) {
-      baseDelay *= 1.1;
-    }
+      const loop = (t: number) => {
+        const delta = t - lastTimeRef.current;
+        lastTimeRef.current = t;
+        accumulatedTimeRef.current += delta;
 
-    timerRef.current = setTimeout(() => {
-      processTick();
-    }, baseDelay);
+        const currentWord = words.current[index] || "";
+        const delay = getDelay(currentWord);
 
-    return () => {
-      if (timerRef.current) clearTimeout(timerRef.current);
-    };
-  }, [isPlaying, index, wpm, processTick]);
+        if (accumulatedTimeRef.current >= delay) {
+          // Time to move to next word
+          setIndex(prev => {
+            const next = prev + 1;
+            // Check boundary
+            if (next >= words.current.length) {
+              if (onComplete) onComplete();
+              return prev;
+            }
+            return next;
+          });
+          accumulatedTimeRef.current -= delay;
+        } else {
+          // Not enough time, keep looping
+          requestRef.current = requestAnimationFrame(loop);
+        }
+      };
+      // Start the inner loop
+      requestRef.current = requestAnimationFrame(loop);
+    });
+
+    return () => cancelAnimationFrame(requestRef.current);
+  }, [isPlaying, index, wpm]); // Dependency on index ensures fresh closure for 'index' reading if needed, though we use setIndex(prev).
+  // Actually, if we depend on index, the loop restarts every word.
+  // This is good because it ensures we are always "fresh" and 'index' in scope is correct-ish (though we rely on prev).
+  // The accumulatedTimeRef handles the continuity.
 
   const currentWord = words.current[index] || "";
   const orpIndex = calculateORP(currentWord);
