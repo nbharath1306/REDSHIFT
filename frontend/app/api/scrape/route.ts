@@ -110,14 +110,17 @@ export async function POST(req: NextRequest) {
             }
             return NextResponse.json({
                 success: false,
-                error: error instanceof Error ? error.message : "Failed to scrape content"
+                error: error instanceof Error ? error.message : "Failed to scrape content",
+                details: error instanceof Error ? error.stack : undefined
             }, { status: 500 });
         }
 
     } catch (error) {
+        console.error("[API Scrape] Fatal Handler Error:", error);
         return NextResponse.json({
             success: false,
-            error: "Internal Server Error"
+            error: "Internal Server Error",
+            details: error instanceof Error ? error.message : String(error)
         }, { status: 500 });
     }
 }

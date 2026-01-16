@@ -63,7 +63,8 @@ export default function Home() {
       const result = await response.json();
 
       if (!result.success || !result.data) {
-        throw new Error(result.error || "Failed to scrape URL");
+        console.error("Scrape failed:", result);
+        throw new Error(result.error + (result.details ? `\nDetails: ${result.details}` : "") || "Failed to scrape URL");
       }
 
       setText(result.data.content || "");
