@@ -47,6 +47,13 @@ export default function ReaderCanvas({
     // Settings State
     const [isSettingsOpen, setIsSettingsOpen] = useState(false);
 
+    // Zen Mode State
+    const [isHovering, setIsHovering] = useState(false);
+
+    // Logic: Show controls if paused, hovering, or Zen Mode is OFF
+    // Note: If settings are open, we likely want controls visible too, but settings modal handles itself
+    const showControls = !isPlaying || isHovering || !settings.zenMode || isSettingsOpen;
+
     // Auto-pause when settings are open
     useEffect(() => {
         if (isSettingsOpen && isPlaying) {
@@ -65,16 +72,34 @@ export default function ReaderCanvas({
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             className="fixed inset-0 z-50 flex flex-col font-mono select-none"
+            onMouseEnter={() => setIsHovering(true)}
+            onMouseLeave={() => setIsHovering(false)}
+            onMouseMove={() => setIsHovering(true)} // Ensure movement wakes it up
         >
             {/* HUD OVERLAY LAYERS */}
-            {/* 1. Vignette: Darken corners heavily */}
-            <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,transparent_0%,#000_100%)] z-0 pointer-events-none" />
+            {/* 1. Vignette: Fade out in Zen Mode Reading */}
+            <div
+                className={cn(
+                    "absolute inset-0 bg-[radial-gradient(circle_at_center,transparent_0%,#000_100%)] z-0 pointer-events-none transition-opacity duration-700",
+                    showControls ? "opacity-100" : "opacity-30"
+                )}
+            />
 
-            {/* 2. Scanlines: CSS Pattern */}
-            <div className="absolute inset-0 bg-[linear-gradient(rgba(18,16,16,0)_50%,rgba(0,0,0,0.25)_50%),linear-gradient(90deg,rgba(255,0,0,0.06),rgba(0,255,0,0.02),rgba(0,0,255,0.06))] z-0 bg-[length:100%_4px,6px_100%] pointer-events-none opacity-20" />
+            {/* 2. Scanlines: Fade out almost completely in Zen Mode */}
+            <div
+                className={cn(
+                    "absolute inset-0 bg-[linear-gradient(rgba(18,16,16,0)_50%,rgba(0,0,0,0.25)_50%),linear-gradient(90deg,rgba(255,0,0,0.06),rgba(0,255,0,0.02),rgba(0,0,255,0.06))] z-0 bg-[length:100%_4px,6px_100%] pointer-events-none transition-opacity duration-700",
+                    showControls ? "opacity-20" : "opacity-5"
+                )}
+            />
 
             {/* Top Bar: Progress & Exit */}
-            <div className="absolute top-0 left-0 right-0 h-16 flex items-center justify-between px-6 z-20 pt-4">
+            <div
+                className={cn(
+                    "absolute top-0 left-0 right-0 h-16 flex items-center justify-between px-6 z-20 pt-4 transition-all duration-500",
+                    showControls ? "opacity-100 translate-y-0" : "opacity-0 -translate-y-4 pointer-events-none"
+                )}
+            >
                 <div className="flex items-center gap-4 text-xs font-bold text-[#FF3131] uppercase tracking-widest bg-black/50 backdrop-blur border border-[#FF3131]/20 px-4 py-2 rounded">
                     <span className="animate-pulse">● LIVE</span>
                     <span className="text-white">{wpmConfig} WPM</span>
@@ -86,7 +111,12 @@ export default function ReaderCanvas({
             </div>
 
             {/* Progress Line - HUD Style */}
-            <div className="absolute top-0 left-0 right-0 h-0.5 bg-gray-900/50 z-20">
+            <div
+                className={cn(
+                    "absolute top-0 left-0 right-0 h-0.5 bg-gray-900/50 z-20 transition-opacity duration-500",
+                    showControls ? "opacity-100" : "opacity-0"
+                )}
+            >
                 <motion.div
                     className="h-full bg-[#FF3131] shadow-[0_0_10px_#FF3131]"
                     style={{ width: `${(progress) * 100}%` }}
@@ -97,10 +127,14 @@ export default function ReaderCanvas({
             {/* Main Canvas (Centered) */}
             <div className="flex-1 flex flex-col items-center justify-center relative z-10">
 
-                {/* Focus Reticle (Decorative HUD Elements) */}
-                <div className="absolute w-[95vw] md:w-[80vw] max-w-[800px] h-24 md:h-32 border-x border-[#FF3131]/20 opacity-50 pointer-events-none flex justify-between items-end pb-2">
-                    <span className="hidden md:inline text-[10px] text-[#FF3131]/50 pl-2">TARGET_LOCK</span>
-                    <span className="hidden md:inline text-[10px] text-[#FF3131]/50 pr-2">ORP_ALIGNED</span>
+                {/* Focus Reticle (Decorative HUD Elements) - HIDE IN ZEN */}
+                <div
+                    className={cn(
+                        "absolute w-[95vw] md:w-[80vw] max-w-[800px] h-24 md:h-32 border-x border-[#FF3131]/20 pointer-events-none flex justify-between items-end pb-2 transition-opacity duration-500",
+                        showControls ? "opacity-50" : "opacity-0"
+                    )}
+                >
+                    {/* Decorative text removed for cleaner look, even when controls shown, or keep subtle */}
                 </div>
 
                 {/* The WORD */}
@@ -109,7 +143,7 @@ export default function ReaderCanvas({
                     style={{ fontSize: `${settings.fontSize}rem` }}
                 >
                     {/* Left Side */}
-                    <span className="flex-1 text-right font-medium opacity-80 overflow-hidden whitespace-nowrap text-ellipsis min-w-0">
+                    <span className="flex-1 text-right font-medium opacity-80 overflow-hidden whitespace-nowrap text-ellipsis min-w-0 text-zinc-400">
                         {leftPart}
                     </span>
 
@@ -119,21 +153,21 @@ export default function ReaderCanvas({
                     </span>
 
                     {/* Right Side */}
-                    <span className="flex-1 text-left font-medium opacity-80 overflow-hidden whitespace-nowrap text-ellipsis min-w-0">
+                    <span className="flex-1 text-left font-medium opacity-80 overflow-hidden whitespace-nowrap text-ellipsis min-w-0 text-zinc-400">
                         {rightPart}
                     </span>
 
-                    {/* Dynamic Guides */}
+                    {/* Dynamic Guides - HIDE IN ZEN? No, keep guides if user asked for them */}
                     {settings.guideAxis === 'vertical' && (
-                        <div className="absolute -top-10 -bottom-10 left-1/2 w-0.5 -translate-x-1/2 bg-[#FF3131]/20 z-0" />
+                        <div className={cn("absolute -top-10 -bottom-10 left-1/2 w-0.5 -translate-x-1/2 bg-[#FF3131]/20 z-0 transition-opacity", showControls ? "opacity-100" : "opacity-30")} />
                     )}
                     {settings.guideAxis === 'horizontal' && (
-                        <div className="absolute left-0 right-0 top-1/2 h-0.5 -translate-y-1/2 bg-[#FF3131]/20 z-0" />
+                        <div className={cn("absolute left-0 right-0 top-1/2 h-0.5 -translate-y-1/2 bg-[#FF3131]/20 z-0 transition-opacity", showControls ? "opacity-100" : "opacity-30")} />
                     )}
                     {settings.guideAxis === 'crosshair' && (
                         <>
-                            <div className="absolute -top-10 -bottom-10 left-1/2 w-0.5 -translate-x-1/2 bg-[#FF3131]/20 z-0" />
-                            <div className="absolute left-0 right-0 top-1/2 h-0.5 -translate-y-1/2 bg-[#FF3131]/20 z-0" />
+                            <div className={cn("absolute -top-10 -bottom-10 left-1/2 w-0.5 -translate-x-1/2 bg-[#FF3131]/20 z-0 transition-opacity", showControls ? "opacity-100" : "opacity-30")} />
+                            <div className={cn("absolute left-0 right-0 top-1/2 h-0.5 -translate-y-1/2 bg-[#FF3131]/20 z-0 transition-opacity", showControls ? "opacity-100" : "opacity-30")} />
                         </>
                     )}
 
@@ -141,13 +175,19 @@ export default function ReaderCanvas({
             </div>
 
             {/* Control Bar (Bottom) */}
-            <div className="h-40 mb-0 flex items-center justify-center gap-4 md:gap-16 pb-12 bg-gradient-to-t from-black to-transparent z-20 relative">
+            <div
+                className={cn(
+                    "h-40 mb-0 flex items-center justify-center gap-4 md:gap-16 pb-12 bg-gradient-to-t from-black to-transparent z-20 relative transition-all duration-500",
+                    showControls ? "opacity-100 translate-y-0" : "opacity-0 translate-y-12 pointer-events-none"
+                )}
+            >
                 {/* Decorative Tech Lines */}
                 <div className="absolute bottom-0 left-0 w-full h-px bg-[#FF3131]/20" />
 
                 <button onClick={() => setIsSettingsOpen(true)} className="absolute left-8 md:left-12 bottom-12 text-gray-500 hover:text-white transition-colors">
                     <Settings2 className="w-6 h-6" />
                 </button>
+
 
                 <div className="flex items-center gap-8">
                     <button onClick={() => onSeek(false)} className="hover:bg-[#FF3131]/10 rounded-full w-16 h-16 flex items-center justify-center transition-colors">
