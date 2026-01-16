@@ -11,7 +11,6 @@ import { Button } from "@/components/ui/button";
 import { Slider } from "@/components/ui/slider";
 import { extractTextFromPdf } from "@/lib/pdf-utils"; // Cogniread Feature
 import { DEMO_CONTENT } from "@/lib/demo-content"; // Preview Feature
-import { scrapeUrl } from "@/app/actions/scrape";
 
 export default function Home() {
   const [text, setText] = useState("");
@@ -54,7 +53,14 @@ export default function Home() {
     if (!urlInput) return;
     setIsLoadingUrl(true);
     try {
-      const result = await scrapeUrl(urlInput);
+      // Use API Route instead of Server Action
+      const response = await fetch("/api/scrape", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ url: urlInput })
+      });
+
+      const result = await response.json();
 
       if (!result.success || !result.data) {
         throw new Error(result.error || "Failed to scrape URL");
