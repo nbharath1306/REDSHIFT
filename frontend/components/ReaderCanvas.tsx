@@ -105,7 +105,7 @@ export default function ReaderCanvas({
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="fixed inset-0 z-50 flex flex-col font-mono select-none"
+            className="fixed inset-0 z-50 flex flex-col font-mono select-none overflow-hidden"
             onMouseMove={handleMouseMove}
             onClick={handleMouseMove}
         >
@@ -127,7 +127,7 @@ export default function ReaderCanvas({
 
                 {/* The WORD */}
                 <div
-                    className="relative flex items-center justify-center w-full max-w-full px-4 leading-none filter drop-shadow-[0_0_10px_rgba(0,0,0,0.5)] transition-all duration-200 ease-out"
+                    className="relative flex items-center justify-center w-full max-w-full px-4 leading-none filter drop-shadow-[0_0_10px_rgba(0,0,0,0.5)]"
                     style={{ fontSize: `${dynamicFontSize}rem` }}
                 >
                     {/* Left Side - Removed overflow-hidden/text-ellipsis */}
