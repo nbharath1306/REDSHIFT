@@ -159,6 +159,8 @@ export default function Home() {
             wpmConfig={wpm}
             totalWords={totalWords}
             currentIndex={index}
+            settings={readerSettings}
+            onSettingsChange={setReaderSettings}
           />
         ) : (
           /* Landing Page Content */
