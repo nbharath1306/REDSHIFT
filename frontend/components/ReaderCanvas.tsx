@@ -93,6 +93,13 @@ export default function ReaderCanvas({
     const orpChar = currentWord[orpIndex] || "";
     const rightPart = currentWord.substring(orpIndex + 1);
 
+    // Dynamic Text Scaling
+    // Base threshold: 10 chars. If longer, scale down.
+    const charCount = currentWord.length;
+    const baseScale = 1;
+    const scaleFactor = charCount > 10 ? Math.max(0.4, 10 / charCount) : 1;
+    const dynamicFontSize = settings.fontSize * scaleFactor;
+
     return (
         <motion.div
             initial={{ opacity: 0 }}
@@ -102,74 +109,29 @@ export default function ReaderCanvas({
             onMouseMove={handleMouseMove}
             onClick={handleMouseMove}
         >
-            {/* HUD OVERLAY LAYERS */}
-            {/* 1. Vignette: Fade out in Zen Mode Reading */}
-            <div
-                className={cn(
-                    "absolute inset-0 bg-[radial-gradient(circle_at_center,transparent_0%,#000_100%)] z-0 pointer-events-none transition-opacity duration-700",
-                    showControls ? "opacity-100" : "opacity-30"
-                )}
-            />
+            {/* ... HUD Layers ... */}
 
-            {/* 2. Scanlines: Fade out almost completely in Zen Mode */}
-            <div
-                className={cn(
-                    "absolute inset-0 bg-[linear-gradient(rgba(18,16,16,0)_50%,rgba(0,0,0,0.25)_50%),linear-gradient(90deg,rgba(255,0,0,0.06),rgba(0,255,0,0.02),rgba(0,0,255,0.06))] z-0 bg-[length:100%_4px,6px_100%] pointer-events-none transition-opacity duration-700",
-                    showControls ? "opacity-20" : "opacity-5"
-                )}
-            />
-
-            {/* Top Bar: Progress & Exit */}
-            <div
-                className={cn(
-                    "absolute top-0 left-0 right-0 h-16 flex items-center justify-between px-6 z-20 pt-4 transition-all duration-500",
-                    showControls ? "opacity-100 translate-y-0" : "opacity-0 -translate-y-4 pointer-events-none"
-                )}
-            >
-                <div className="flex items-center gap-4 text-xs font-bold text-[#FF3131] uppercase tracking-widest bg-black/50 backdrop-blur border border-[#FF3131]/20 px-4 py-2 rounded">
-                    <span className="animate-pulse">● LIVE</span>
-                    <span className="text-white">{wpmConfig} WPM</span>
-                    <span>{currentIndex + 1} / {totalWords}</span>
-                </div>
-                <button onClick={onExit} className="hover:text-[#FF3131] hover:bg-black/50 text-gray-400 p-2 rounded transition-colors">
-                    <X className="w-6 h-6" />
-                </button>
-            </div>
-
-            {/* Progress Line - HUD Style */}
-            <div
-                className={cn(
-                    "absolute top-0 left-0 right-0 h-0.5 bg-gray-900/50 z-20 transition-opacity duration-500",
-                    showControls ? "opacity-100" : "opacity-0"
-                )}
-            >
-                <motion.div
-                    className="h-full bg-[#FF3131] shadow-[0_0_10px_#FF3131]"
-                    style={{ width: `${(progress) * 100}%` }}
-                    transition={{ ease: "linear", duration: 0.1 }}
-                />
-            </div>
+            {/* Top/Bottom Bars ... */}
 
             {/* Main Canvas (Centered) */}
             <div className="flex-1 flex flex-col items-center justify-center relative z-10">
 
-                {/* Focus Reticle (Decorative HUD Elements) - HIDE IN ZEN */}
+                {/* Focus Reticle ... */}
                 <div
                     className={cn(
                         "absolute w-[95vw] md:w-[80vw] max-w-[800px] h-24 md:h-32 border-x border-[#FF3131]/20 pointer-events-none flex justify-between items-end pb-2 transition-opacity duration-500",
                         showControls ? "opacity-50" : "opacity-0"
                     )}
                 >
-                    {/* Decorative text removed for cleaner look, even when controls shown, or keep subtle */}
                 </div>
 
                 {/* The WORD */}
                 <div
-                    className="relative flex items-baseline justify-center w-full max-w-full px-4 leading-none filter drop-shadow-[0_0_10px_rgba(0,0,0,0.5)] transition-all duration-300"
-                    style={{ fontSize: `${settings.fontSize}rem` }}
+                    className="relative flex items-baseline justify-center w-full max-w-full px-4 leading-none filter drop-shadow-[0_0_10px_rgba(0,0,0,0.5)] transition-all duration-100 ease-out"
+                    style={{ fontSize: `${dynamicFontSize}rem` }}
                 >
-                    {/* Left Side */}
-                    <span className="flex-1 text-right font-medium opacity-80 overflow-hidden whitespace-nowrap text-ellipsis min-w-0 text-zinc-400">
+                    {/* Left Side - Removed overflow-hidden/text-ellipsis */}
+                    <span className="flex-1 text-right font-medium opacity-80 whitespace-nowrap text-zinc-400">
                         {leftPart}
                     </span>
 
@@ -178,12 +140,12 @@ export default function ReaderCanvas({
                         {orpChar}
                     </span>
 
-                    {/* Right Side */}
-                    <span className="flex-1 text-left font-medium opacity-80 overflow-hidden whitespace-nowrap text-ellipsis min-w-0 text-zinc-400">
+                    {/* Right Side - Removed overflow-hidden/text-ellipsis */}
+                    <span className="flex-1 text-left font-medium opacity-80 whitespace-nowrap text-zinc-400">
                         {rightPart}
                     </span>
 
-                    {/* Dynamic Guides - HIDE IN ZEN? No, keep guides if user asked for them */}
+                    {/* Dynamic Guides ... */}
                     {settings.guideAxis === 'vertical' && (
                         <div className={cn("absolute -top-10 -bottom-10 left-1/2 w-0.5 -translate-x-1/2 bg-[#FF3131]/20 z-0 transition-opacity", showControls ? "opacity-100" : "opacity-30")} />
                     )}
