@@ -9,12 +9,29 @@ function parseHtml(html: string, url: string) {
     return reader.parse();
 }
 
+// Helper to ensure URL has protocol
+function normalizeUrl(input: string): string {
+    if (!input.match(/^https?:\/\//i)) {
+        return `https://${input}`;
+    }
+    return input;
+}
+
 export async function POST(req: NextRequest) {
     try {
-        const { url } = await req.json();
+        const body = await req.json();
+        let { url } = body;
 
         if (!url) {
             return NextResponse.json({ success: false, error: "URL is required" }, { status: 400 });
+        }
+
+        // Validate & Normalize URL
+        try {
+            url = normalizeUrl(url.trim());
+            new URL(url); // Test if valid
+        } catch (e) {
+            return NextResponse.json({ success: false, error: "Invalid URL format" }, { status: 400 });
         }
 
         console.log(`[API Scrape] Starting for: ${url}`);
