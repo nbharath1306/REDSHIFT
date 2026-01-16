@@ -54,10 +54,14 @@ export default function Home() {
     setIsLoadingUrl(true);
     try {
       const { scrapeUrl } = await import("@/app/actions/scrape");
-      const article = await scrapeUrl(urlInput);
+      const result = await scrapeUrl(urlInput);
 
-      setText(article.content);
-      setFileName(article.title);
+      if (!result.success || !result.data) {
+        throw new Error(result.error || "Failed to scrape URL");
+      }
+
+      setText(result.data.content);
+      setFileName(result.data.title);
     } catch (error: any) {
       console.error(error);
       alert(`Error: ${error.message || "Failed to load URL"}`);
