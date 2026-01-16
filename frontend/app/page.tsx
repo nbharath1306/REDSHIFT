@@ -12,12 +12,21 @@ import { Slider } from "@/components/ui/slider";
 import { extractTextFromPdf } from "@/lib/pdf-utils"; // Cogniread Feature
 import { DEMO_CONTENT } from "@/lib/demo-content"; // Preview Feature
 
+import { ReaderSettings } from "@/components/ReaderSettings"; // Import Type
+
 export default function Home() {
   const [text, setText] = useState("");
   const [wpm, setWpm] = useState(600);
   const [isPlaying, setIsPlaying] = useState(false);
   const [isReaderOpen, setIsReaderOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+
+  // Global Reader Settings Persistence
+  const [readerSettings, setReaderSettings] = useState<ReaderSettings>({
+    fontSize: 6,
+    guideAxis: 'horizontal',
+    guideOpacity: 0.5
+  });
 
   // New State for Source Modes
   const [sourceMode, setSourceMode] = useState<"text" | "file" | "url">("text");

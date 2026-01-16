@@ -24,6 +24,8 @@ type ReaderCanvasProps = {
     wpmConfig: number;
     totalWords: number;
     currentIndex: number;
+    settings: ReaderSettings;
+    onSettingsChange: (settings: ReaderSettings) => void;
 };
 
 export default function ReaderCanvas({
@@ -37,16 +39,14 @@ export default function ReaderCanvas({
     progress,
     wpmConfig,
     totalWords,
-    currentIndex
+    currentIndex,
+    settings,
+    onSettingsChange
 }: ReaderCanvasProps) {
 
     // Settings State
     const [isSettingsOpen, setIsSettingsOpen] = useState(false);
-    const [settings, setSettings] = useState<ReaderSettings>({
-        fontSize: 6, // Default large
-        guideAxis: 'horizontal',
-        guideOpacity: 0.5
-    });
+    // Internal settings state removed in favor of props
 
     // ORP Slicing Logic
     const leftPart = currentWord.substring(0, orpIndex);
@@ -183,7 +183,7 @@ export default function ReaderCanvas({
                 isOpen={isSettingsOpen}
                 onClose={() => setIsSettingsOpen(false)}
                 settings={settings}
-                onUpdate={setSettings}
+                onUpdate={onSettingsChange}
             />
 
         </motion.div>
