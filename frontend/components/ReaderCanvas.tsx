@@ -86,12 +86,7 @@ export default function ReaderCanvas({
     }, [isPlaying, settings.zenMode]);
 
 
-    // Auto-pause when settings are open
-    useEffect(() => {
-        if (isSettingsOpen && isPlaying) {
-            onTogglePlay();
-        }
-    }, [isSettingsOpen, isPlaying, onTogglePlay]);
+
 
     // ORP Slicing Logic
     const leftPart = currentWord.substring(0, orpIndex);
