@@ -25,7 +25,8 @@ export default function Home() {
   const [readerSettings, setReaderSettings] = useState<ReaderSettings>({
     fontSize: 6,
     guideAxis: 'horizontal',
-    guideOpacity: 0.5
+    guideOpacity: 0.5,
+    zenMode: true
   });
 
   // New State for Source Modes
