@@ -127,7 +127,7 @@ export default function ReaderCanvas({
 
                 {/* The WORD */}
                 <div
-                    className="relative flex items-baseline justify-center w-full max-w-full px-4 leading-none filter drop-shadow-[0_0_10px_rgba(0,0,0,0.5)] transition-all duration-100 ease-out"
+                    className="relative flex items-center justify-center w-full max-w-full px-4 leading-none filter drop-shadow-[0_0_10px_rgba(0,0,0,0.5)] transition-all duration-200 ease-out"
                     style={{ fontSize: `${dynamicFontSize}rem` }}
                 >
                     {/* Left Side - Removed overflow-hidden/text-ellipsis */}
