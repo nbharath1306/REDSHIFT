@@ -48,11 +48,43 @@ export default function ReaderCanvas({
     const [isSettingsOpen, setIsSettingsOpen] = useState(false);
 
     // Zen Mode State
-    const [isHovering, setIsHovering] = useState(false);
+    const [isHovering, setIsHovering] = useState(true); // Start visible
+    const [idleTimer, setIdleTimer] = useState<NodeJS.Timeout | null>(null);
 
     // Logic: Show controls if paused, hovering, or Zen Mode is OFF
-    // Note: If settings are open, we likely want controls visible too, but settings modal handles itself
     const showControls = !isPlaying || isHovering || !settings.zenMode || isSettingsOpen;
+
+    // Handle Mouse Movement (Idle Detection)
+    const handleMouseMove = () => {
+        setIsHovering(true);
+        if (idleTimer) clearTimeout(idleTimer);
+
+        // Only start hide timer if we are playing and in Zen Mode
+        if (isPlaying && settings.zenMode && !isSettingsOpen) {
+            const timer = setTimeout(() => {
+                setIsHovering(false);
+            }, 1500); // 1.5s idle to hide
+            setIdleTimer(timer);
+        }
+    };
+
+    // Cleanup timer on unmount
+    useEffect(() => {
+        return () => {
+            if (idleTimer) clearTimeout(idleTimer);
+        }
+    }, [idleTimer]);
+
+    // Force hide when playing starts
+    useEffect(() => {
+        if (isPlaying && settings.zenMode) {
+            const timer = setTimeout(() => setIsHovering(false), 500);
+            return () => clearTimeout(timer);
+        } else {
+            setIsHovering(true);
+        }
+    }, [isPlaying, settings.zenMode]);
+
 
     // Auto-pause when settings are open
     useEffect(() => {
@@ -72,9 +104,8 @@ export default function ReaderCanvas({
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             className="fixed inset-0 z-50 flex flex-col font-mono select-none"
-            onMouseEnter={() => setIsHovering(true)}
-            onMouseLeave={() => setIsHovering(false)}
-            onMouseMove={() => setIsHovering(true)} // Ensure movement wakes it up
+            onMouseMove={handleMouseMove}
+            onClick={handleMouseMove}
         >
             {/* HUD OVERLAY LAYERS */}
             {/* 1. Vignette: Fade out in Zen Mode Reading */}
