@@ -7,6 +7,8 @@ import { useRSVP } from "@/hooks/useRSVP"; // Patched with ORP
 import ReaderCanvas from "@/components/ReaderCanvas"; // Redshift HUD
 import WarpBackground from "@/components/WarpBackground"; // Redshift Warp
 import { clsx } from "clsx";
+import { Button } from "@/components/ui/button";
+import { Slider } from "@/components/ui/slider";
 import { extractTextFromPdf } from "@/lib/pdf-utils"; // Cogniread Feature
 import { DEMO_CONTENT } from "@/lib/demo-content"; // Preview Feature
 
