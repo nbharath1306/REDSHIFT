@@ -210,7 +210,13 @@ export default function ReaderCanvas({
                 {/* Decorative Tech Lines */}
                 <div className="absolute bottom-0 left-0 w-full h-px bg-[#FF3131]/20" />
 
-                <button onClick={() => setIsSettingsOpen(true)} className="absolute left-8 md:left-12 bottom-12 text-gray-500 hover:text-white transition-colors">
+                <button
+                    onClick={() => {
+                        setIsSettingsOpen(true);
+                        if (isPlaying) onTogglePlay();
+                    }}
+                    className="absolute left-8 md:left-12 bottom-12 text-gray-500 hover:text-white transition-colors"
+                >
                     <Settings2 className="w-6 h-6" />
                 </button>
 
