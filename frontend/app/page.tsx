@@ -11,6 +11,7 @@ import { Button } from "@/components/ui/button";
 import { Slider } from "@/components/ui/slider";
 import { extractTextFromPdf } from "@/lib/pdf-utils"; // Cogniread Feature
 import { DEMO_CONTENT } from "@/lib/demo-content"; // Preview Feature
+import { scrapeUrl } from "@/app/actions/scrape";
 
 export default function Home() {
   const [text, setText] = useState("");
@@ -53,15 +54,14 @@ export default function Home() {
     if (!urlInput) return;
     setIsLoadingUrl(true);
     try {
-      const { scrapeUrl } = await import("@/app/actions/scrape");
       const result = await scrapeUrl(urlInput);
 
       if (!result.success || !result.data) {
         throw new Error(result.error || "Failed to scrape URL");
       }
 
-      setText(result.data.content);
-      setFileName(result.data.title);
+      setText(result.data.content || "");
+      setFileName(result.data.title || "Scraped Article");
     } catch (error: any) {
       console.error(error);
       alert(`Error: ${error.message || "Failed to load URL"}`);
