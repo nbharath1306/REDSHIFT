@@ -246,8 +246,20 @@ export default function Home() {
                   </div>
                 </Button>
 
-                <p className="text-[10px] text-center text-gray-700 font-mono uppercase tracking-widest">
-                  System Ready // Awaiting Input
+                <p className="text-[10px] text-center text-gray-700 font-mono uppercase tracking-widest flex items-center justify-center gap-4">
+                  <span>System Ready // Awaiting Input</span>
+                  <span className="text-gray-800">|</span>
+                  <button
+                    onClick={() => {
+                      import("@/lib/demo-content").then(({ DEMO_CONTENT }) => {
+                        setText(DEMO_CONTENT);
+                        setTimeout(() => handleIngest(), 100);
+                      });
+                    }}
+                    className="hover:text-redshift-red transition-colors cursor-pointer"
+                  >
+                    [ INITIATE DEMO PROTOCOL ]
+                  </button>
                 </p>
               </div>
             </div>
