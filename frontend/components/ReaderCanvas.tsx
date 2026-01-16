@@ -88,24 +88,24 @@ export default function ReaderCanvas({
                 </div>
 
                 {/* The WORD */}
-                <div className="relative flex items-end text-5xl md:text-7xl lg:text-9xl leading-none filter drop-shadow-[0_0_10px_rgba(0,0,0,0.5)]">
+                <div className="relative flex items-baseline justify-center w-full max-w-full px-4 text-5xl md:text-7xl lg:text-9xl leading-none filter drop-shadow-[0_0_10px_rgba(0,0,0,0.5)]">
                     {/* Left Side */}
-                    <span className="text-white text-right w-[45vw] lg:w-[450px] font-medium tracking-tight opacity-80 overflow-hidden whitespace-nowrap text-ellipsis direction-rtl unicode-bidi-isolate">
+                    <span className="flex-1 text-right font-medium opacity-80 overflow-hidden whitespace-nowrap text-ellipsis min-w-0">
                         {leftPart}
                     </span>
 
                     {/* The ORP */}
-                    <span className="text-[#FF3131] font-bold mx-1 relative drop-shadow-[0_0_15px_rgba(255,49,49,0.8)] flex-shrink-0">
+                    <span className="text-[#FF3131] font-bold mx-0.5 relative drop-shadow-[0_0_15px_rgba(255,49,49,0.8)] flex-shrink-0 z-10">
                         {orpChar}
                     </span>
 
                     {/* Right Side */}
-                    <span className="text-white text-left w-[45vw] lg:w-[450px] font-medium tracking-tight opacity-80 overflow-hidden whitespace-nowrap text-ellipsis">
+                    <span className="flex-1 text-left font-medium opacity-80 overflow-hidden whitespace-nowrap text-ellipsis min-w-0">
                         {rightPart}
                     </span>
 
                     {/* Center Axis HUD Line */}
-                    <div className="absolute -top-10 -bottom-10 left-1/2 w-px -translate-x-1/2 bg-gradient-to-b from-transparent via-[#FF3131]/30 to-transparent" />
+                    <div className="absolute -top-10 -bottom-10 left-1/2 w-0.5 -translate-x-1/2 bg-[#FF3131]/20 z-0" />
                 </div>
             </div>
 
