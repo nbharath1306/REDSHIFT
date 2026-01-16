@@ -9,11 +9,14 @@ interface RSVPHookProps {
 
 const calculateORP = (word: string): number => {
   const len = word.length;
-  if (len <= 1) return 0;
-  if (len <= 5) return 1;
-  if (len <= 9) return 2;
-  if (len <= 13) return 3;
-  return 4;
+  // Scientific "Optimal Recognition Point" Algorithm
+  // The eye lands best slightly left of center.
+  if (len <= 1) return 0;   // "A" (center)
+  if (len <= 4) return 1;   // "THE" (1st/2nd char)
+  if (len <= 9) return 2;   // "POWER" (3rd char)
+  if (len <= 13) return 3;  // "UNIVERSAL" (4th char)
+  if (len <= 18) return 4;  // "INTERNATIONAL" (5th char)
+  return 5;                 // "ANTIDISESTABLISHMENT..." (6th char) - Caps here to keep foveal anchor
 };
 
 export const useRSVP = ({ text, wpm, isPlaying, onComplete }: RSVPHookProps) => {
