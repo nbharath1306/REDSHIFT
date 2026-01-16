@@ -1,10 +1,12 @@
 "use client";
 
-import { Play, Pause, RotateCcw, ChevronRight, ChevronLeft, X } from "lucide-react";
+import { Play, Pause, RotateCcw, ChevronRight, ChevronLeft, X, Settings2 } from "lucide-react";
 // We don't have a Button component in Cogniread by default, will use raw HTML or basic implementation
 import { motion } from "framer-motion";
 import { clsx, type ClassValue } from 'clsx';
 import { twMerge } from 'tailwind-merge';
+import { useState } from "react";
+import { ReaderSettingsMenu, type ReaderSettings } from "./ReaderSettings";
 
 function cn(...inputs: ClassValue[]) {
     return twMerge(clsx(inputs));
@@ -37,6 +39,14 @@ export default function ReaderCanvas({
     totalWords,
     currentIndex
 }: ReaderCanvasProps) {
+
+    // Settings State
+    const [isSettingsOpen, setIsSettingsOpen] = useState(false);
+    const [settings, setSettings] = useState<ReaderSettings>({
+        fontSize: 6, // Default large
+        guideAxis: 'horizontal',
+        guideOpacity: 0.5
+    });
 
     // ORP Slicing Logic
     const leftPart = currentWord.substring(0, orpIndex);
@@ -88,7 +98,10 @@ export default function ReaderCanvas({
                 </div>
 
                 {/* The WORD */}
-                <div className="relative flex items-baseline justify-center w-full max-w-full px-4 text-5xl md:text-7xl lg:text-9xl leading-none filter drop-shadow-[0_0_10px_rgba(0,0,0,0.5)]">
+                <div
+                    className="relative flex items-baseline justify-center w-full max-w-full px-4 leading-none filter drop-shadow-[0_0_10px_rgba(0,0,0,0.5)] transition-all duration-300"
+                    style={{ fontSize: `${settings.fontSize}rem` }}
+                >
                     {/* Left Side */}
                     <span className="flex-1 text-right font-medium opacity-80 overflow-hidden whitespace-nowrap text-ellipsis min-w-0">
                         {leftPart}
@@ -104,33 +117,51 @@ export default function ReaderCanvas({
                         {rightPart}
                     </span>
 
-                    {/* Center Axis HUD Line */}
-                    <div className="absolute -top-10 -bottom-10 left-1/2 w-0.5 -translate-x-1/2 bg-[#FF3131]/20 z-0" />
+                    {/* Dynamic Guides */}
+                    {settings.guideAxis === 'vertical' && (
+                        <div className="absolute -top-10 -bottom-10 left-1/2 w-0.5 -translate-x-1/2 bg-[#FF3131]/20 z-0" />
+                    )}
+                    {settings.guideAxis === 'horizontal' && (
+                        <div className="absolute left-0 right-0 top-1/2 h-0.5 -translate-y-1/2 bg-[#FF3131]/20 z-0" />
+                    )}
+                    {settings.guideAxis === 'crosshair' && (
+                        <>
+                            <div className="absolute -top-10 -bottom-10 left-1/2 w-0.5 -translate-x-1/2 bg-[#FF3131]/20 z-0" />
+                            <div className="absolute left-0 right-0 top-1/2 h-0.5 -translate-y-1/2 bg-[#FF3131]/20 z-0" />
+                        </>
+                    )}
+
                 </div>
             </div>
 
             {/* Control Bar (Bottom) */}
-            <div className="h-40 mb-0 flex items-center justify-center gap-8 md:gap-16 pb-12 bg-gradient-to-t from-black to-transparent z-20 relative">
+            <div className="h-40 mb-0 flex items-center justify-center gap-4 md:gap-16 pb-12 bg-gradient-to-t from-black to-transparent z-20 relative">
                 {/* Decorative Tech Lines */}
                 <div className="absolute bottom-0 left-0 w-full h-px bg-[#FF3131]/20" />
 
-                <button onClick={() => onSeek(false)} className="hover:bg-[#FF3131]/10 rounded-full w-16 h-16 flex items-center justify-center transition-colors">
-                    <ChevronLeft className="w-10 h-10 text-white/70" />
+                <button onClick={() => setIsSettingsOpen(true)} className="absolute left-8 md:left-12 bottom-12 text-gray-500 hover:text-white transition-colors">
+                    <Settings2 className="w-6 h-6" />
                 </button>
 
-                <button
-                    className={cn(
-                        "w-24 h-24 rounded-full border-2 shadow-[0_0_30px_rgba(255,49,49,0.2)] flex items-center justify-center transition-all",
-                        isPlaying ? "border-[#FF3131] text-[#FF3131] bg-black/50" : "border-white/20 text-white hover:border-[#FF3131] hover:text-[#FF3131]"
-                    )}
-                    onClick={onTogglePlay}
-                >
-                    {isPlaying ? <Pause className="w-10 h-10 fill-current" /> : <Play className="w-10 h-10 fill-current ml-1" />}
-                </button>
+                <div className="flex items-center gap-8">
+                    <button onClick={() => onSeek(false)} className="hover:bg-[#FF3131]/10 rounded-full w-16 h-16 flex items-center justify-center transition-colors">
+                        <ChevronLeft className="w-10 h-10 text-white/70" />
+                    </button>
 
-                <button onClick={() => onSeek(true)} className="hover:bg-[#FF3131]/10 rounded-full w-16 h-16 flex items-center justify-center transition-colors">
-                    <ChevronRight className="w-10 h-10 text-white/70" />
-                </button>
+                    <button
+                        className={cn(
+                            "w-24 h-24 rounded-full border-2 shadow-[0_0_30px_rgba(255,49,49,0.2)] flex items-center justify-center transition-all",
+                            isPlaying ? "border-[#FF3131] text-[#FF3131] bg-black/50" : "border-white/20 text-white hover:border-[#FF3131] hover:text-[#FF3131]"
+                        )}
+                        onClick={onTogglePlay}
+                    >
+                        {isPlaying ? <Pause className="w-10 h-10 fill-current" /> : <Play className="w-10 h-10 fill-current ml-1" />}
+                    </button>
+
+                    <button onClick={() => onSeek(true)} className="hover:bg-[#FF3131]/10 rounded-full w-16 h-16 flex items-center justify-center transition-colors">
+                        <ChevronRight className="w-10 h-10 text-white/70" />
+                    </button>
+                </div>
 
                 <button onClick={onRestart} className="absolute right-8 md:right-12 bottom-12 text-gray-500 hover:text-white transition-colors">
                     <RotateCcw className="w-6 h-6" />
@@ -138,7 +169,7 @@ export default function ReaderCanvas({
             </div>
 
             {/* Paused Overlay */}
-            {!isPlaying && (
+            {!isPlaying && !isSettingsOpen && (
                 <div className="absolute inset-0 flex items-center justify-center pointer-events-none z-30">
                     <div className="w-full h-full bg-black/20 backdrop-blur-sm absolute" />
                     <div className="text-[12vw] font-black text-white/10 uppercase tracking-[0.2em] relative">
@@ -146,6 +177,15 @@ export default function ReaderCanvas({
                     </div>
                 </div>
             )}
+
+            {/* Settings Modal */}
+            <ReaderSettingsMenu
+                isOpen={isSettingsOpen}
+                onClose={() => setIsSettingsOpen(false)}
+                settings={settings}
+                onUpdate={setSettings}
+            />
+
         </motion.div>
     );
 }
