@@ -8,6 +8,7 @@ export interface ReaderSettings {
     fontSize: number; // in rem
     guideAxis: 'none' | 'horizontal' | 'vertical' | 'crosshair';
     guideOpacity: number;
+    zenMode: boolean; // Auto-hide controls
 }
 
 interface ReaderSettingsMenuProps {
@@ -25,7 +26,7 @@ export const ReaderSettingsMenu: React.FC<ReaderSettingsMenuProps> = ({
 }) => {
     if (!isOpen) return null;
 
-    const handleChange = (key: keyof ReaderSettings, value: string | number) => {
+    const handleChange = (key: keyof ReaderSettings, value: string | number | boolean) => {
         onUpdate({ ...settings, [key]: value });
     };
 
@@ -49,6 +50,17 @@ export const ReaderSettingsMenu: React.FC<ReaderSettingsMenuProps> = ({
                 </h2>
 
                 <div className="space-y-8 relative z-10">
+
+                    {/* Zen Mode Toggle */}
+                    <div className="flex items-center justify-between group">
+                        <label className="text-xs font-bold text-redshift-red uppercase tracking-widest group-hover:text-white transition-colors">Zen Mode</label>
+                        <button
+                            onClick={() => handleChange('zenMode', !settings.zenMode)}
+                            className={`w-12 h-6 rounded-full p-1 transition-all ${settings.zenMode ? 'bg-redshift-red shadow-[0_0_10px_#FF3131]' : 'bg-white/10'}`}
+                        >
+                            <div className={`w-4 h-4 rounded-full bg-white transition-all ${settings.zenMode ? 'translate-x-6' : 'translate-x-0'}`} />
+                        </button>
+                    </div>
 
                     {/* Font Size Control */}
                     <div className="space-y-4">
@@ -76,8 +88,8 @@ export const ReaderSettingsMenu: React.FC<ReaderSettingsMenuProps> = ({
                                     key={axis}
                                     onClick={() => handleChange('guideAxis', axis as any)}
                                     className={`text-[10px] uppercase p-3 rounded font-bold tracking-widest transition-all ${settings.guideAxis === axis
-                                            ? 'bg-redshift-red text-black shadow-[0_0_15px_rgba(255,49,49,0.6)]'
-                                            : 'bg-white/5 text-gray-400 hover:bg-white/10 hover:text-white'
+                                        ? 'bg-redshift-red text-black shadow-[0_0_15px_rgba(255,49,49,0.6)]'
+                                        : 'bg-white/5 text-gray-400 hover:bg-white/10 hover:text-white'
                                         }`}
                                 >
                                     {axis}
