@@ -90,17 +90,17 @@ export default function ReaderCanvas({
                 {/* The WORD */}
                 <div className="relative flex items-end text-5xl md:text-7xl lg:text-9xl leading-none filter drop-shadow-[0_0_10px_rgba(0,0,0,0.5)]">
                     {/* Left Side */}
-                    <span className="text-white text-right w-[45vw] lg:w-[450px] font-medium tracking-tight opacity-80">
+                    <span className="text-white text-right w-[45vw] lg:w-[450px] font-medium tracking-tight opacity-80 overflow-hidden whitespace-nowrap text-ellipsis direction-rtl unicode-bidi-isolate">
                         {leftPart}
                     </span>
 
                     {/* The ORP */}
-                    <span className="text-[#FF3131] font-bold mx-1 relative drop-shadow-[0_0_15px_rgba(255,49,49,0.8)]">
+                    <span className="text-[#FF3131] font-bold mx-1 relative drop-shadow-[0_0_15px_rgba(255,49,49,0.8)] flex-shrink-0">
                         {orpChar}
                     </span>
 
                     {/* Right Side */}
-                    <span className="text-white text-left w-[45vw] lg:w-[450px] font-medium tracking-tight opacity-80">
+                    <span className="text-white text-left w-[45vw] lg:w-[450px] font-medium tracking-tight opacity-80 overflow-hidden whitespace-nowrap text-ellipsis">
                         {rightPart}
                     </span>
 
