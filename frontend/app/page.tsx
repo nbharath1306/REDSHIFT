@@ -1,8 +1,8 @@
 "use client";
 
-import { useState, useCallback } from "react";
+import { useState, useCallback, useEffect, Suspense } from "react";
 import { AnimatePresence, motion } from "framer-motion";
-import { Zap, PlayCircle, Settings2, Upload, FileText } from "lucide-react";
+import { Zap, PlayCircle, Settings2, Upload, FileText, Library } from "lucide-react";
 import { useRSVP } from "@/hooks/useRSVP"; // Patched with ORP
 import ReaderCanvas from "@/components/ReaderCanvas"; // Redshift HUD
 import WarpBackground from "@/components/WarpBackground"; // Redshift Warp
@@ -11,15 +11,39 @@ import { Button } from "@/components/ui/button";
 import { Slider } from "@/components/ui/slider";
 import { extractTextFromPdf } from "@/lib/pdf-utils"; // Cogniread Feature
 import { DEMO_CONTENT } from "@/lib/demo-content"; // Preview Feature
+import { useSearchParams } from "next/navigation";
+import { db } from "@/lib/db";
+import Link from "next/link";
 
 import { ReaderSettings } from "@/components/ReaderSettings"; // Import Type
 
-export default function Home() {
+function ReaderContent() {
+  const searchParams = useSearchParams();
+  const bookId = searchParams.get("bookId");
+
   const [text, setText] = useState("");
   const [wpm, setWpm] = useState(600);
   const [isPlaying, setIsPlaying] = useState(false);
   const [isReaderOpen, setIsReaderOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+
+  // Load Book from Vault if ID present
+  useEffect(() => {
+    if (bookId) {
+      setIsLoading(true);
+      db.books.get(bookId).then(book => {
+        if (book) {
+          setText(book.content);
+          setIsReaderOpen(true);
+          // Also load progress if exists
+          db.progress.get(bookId).then(p => {
+            // TODO: Restore position if needed
+          });
+        }
+      }).catch(err => console.error("Failed to load book:", err))
+        .finally(() => setIsLoading(false));
+    }
+  }, [bookId]);
 
   // Global Reader Settings Persistence
   const [readerSettings, setReaderSettings] = useState<ReaderSettings>({
@@ -186,6 +210,12 @@ export default function Home() {
                   <p className="text-[10px] text-redshift-red tracking-[0.3em] uppercase font-bold">Cognitive Acceleration Engine</p>
                 </div>
               </div>
+
+              {/* Library Link */}
+              <Link href="/library" className="group flex items-center gap-2 px-4 py-2 bg-white/5 rounded-full hover:bg-white/10 border border-white/5 hover:border-redshift-red/50 transition-all">
+                <Library className="w-4 h-4 text-gray-400 group-hover:text-redshift-red" />
+                <span className="text-xs font-mono font-bold text-gray-400 group-hover:text-white uppercase tracking-widest">Open Vault</span>
+              </Link>
 
               <div className="flex gap-12 text-xs text-gray-500 font-mono uppercase tracking-widest hidden md:flex">
                 <div className="flex flex-col items-center gap-1">
@@ -408,5 +438,13 @@ export default function Home() {
         )}
       </AnimatePresence>
     </div>
+  );
+}
+
+export default function Home() {
+  return (
+    <Suspense fallback={<div className="bg-black min-h-screen text-white flex items-center justify-center font-mono">INITIALIZING NEURAL INTERFACE...</div>}>
+      <ReaderContent />
+    </Suspense>
   );
 }
