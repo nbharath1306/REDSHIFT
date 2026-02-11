@@ -135,8 +135,8 @@ export default function ReaderCanvas({
                         {leftPart}
                     </span>
 
-                    {/* The ORP */}
-                    <span className="text-[#FF3131] font-bold mx-0.5 relative drop-shadow-[0_0_15px_rgba(255,49,49,0.8)] flex-shrink-0 z-10">
+                    {/* The ORP - Removing mx-0.5 to fix gap */}
+                    <span className="text-[#FF3131] font-bold mx-0 relative drop-shadow-[0_0_15px_rgba(255,49,49,0.8)] flex-shrink-0 z-10">
                         {orpChar}
                     </span>
 
@@ -162,10 +162,10 @@ export default function ReaderCanvas({
                 </div>
             </div>
 
-            {/* Control Bar (Bottom) */}
+            {/* Control Bar (Bottom) - Now Absolute to perfect center text */}
             <div
                 className={cn(
-                    "h-40 mb-0 flex items-center justify-center gap-4 md:gap-16 pb-12 bg-gradient-to-t from-black to-transparent z-20 relative transition-all duration-500",
+                    "absolute bottom-0 left-0 right-0 h-40 mb-0 flex items-center justify-center gap-4 md:gap-16 pb-12 bg-gradient-to-t from-black to-transparent z-20 transition-all duration-500",
                     showControls ? "opacity-100 translate-y-0" : "opacity-0 translate-y-12 pointer-events-none"
                 )}
             >
