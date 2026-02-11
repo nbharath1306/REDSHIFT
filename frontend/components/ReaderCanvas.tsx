@@ -7,6 +7,8 @@ import { clsx, type ClassValue } from 'clsx';
 import { twMerge } from 'tailwind-merge';
 import { useState, useEffect } from "react";
 import { ReaderSettingsMenu, type ReaderSettings } from "./ReaderSettings";
+import { MentorModal } from "./MentorModal";
+import { Brain } from "lucide-react";
 
 function cn(...inputs: ClassValue[]) {
     return twMerge(clsx(inputs));
@@ -26,6 +28,7 @@ type ReaderCanvasProps = {
     currentIndex: number;
     settings: ReaderSettings;
     onSettingsChange: (settings: ReaderSettings) => void;
+    fullText: string;
 };
 
 export default function ReaderCanvas({
@@ -41,11 +44,13 @@ export default function ReaderCanvas({
     totalWords,
     currentIndex,
     settings,
-    onSettingsChange
+    onSettingsChange,
+    fullText
 }: ReaderCanvasProps) {
 
     // Settings State
     const [isSettingsOpen, setIsSettingsOpen] = useState(false);
+    const [showMentor, setShowMentor] = useState(false);
 
     // Zen Mode State
     const [isHovering, setIsHovering] = useState(true); // Start visible
@@ -230,6 +235,13 @@ export default function ReaderCanvas({
                 <button onClick={onRestart} className="absolute right-8 md:right-12 bottom-12 text-gray-500 hover:text-white transition-colors">
                     <RotateCcw className="w-6 h-6" />
                 </button>
+
+                <button
+                    onClick={() => setShowMentor(true)}
+                    className="absolute bottom-24 bg-purple-600/20 hover:bg-purple-600/40 border border-purple-500/50 p-3 rounded-full text-purple-400 hover:text-white transition-all shadow-[0_0_20px_rgba(168,85,247,0.2)]"
+                >
+                    <Brain className="w-5 h-5" />
+                </button>
             </div>
 
             {/* Exit Button - Always visible or toggleable */}
@@ -285,6 +297,13 @@ export default function ReaderCanvas({
                     </motion.div>
                 </div>
             )}
+
+            {/* Mentor Modal */}
+            <MentorModal
+                isOpen={showMentor}
+                onClose={() => setShowMentor(false)}
+                contextText={fullText}
+            />
 
             {/* Settings Modal */}
             <ReaderSettingsMenu

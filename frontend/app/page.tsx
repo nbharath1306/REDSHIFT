@@ -222,6 +222,7 @@ function ReaderContent() {
             currentIndex={index}
             settings={readerSettings}
             onSettingsChange={setReaderSettings}
+            fullText={text}
           />
         ) : (
           /* Landing Page Content */
