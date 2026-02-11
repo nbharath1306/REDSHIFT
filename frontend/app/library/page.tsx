@@ -47,8 +47,6 @@ export default function LibraryPage() {
         <div className="min-h-screen bg-black text-white p-6 md:p-12 font-sans selection:bg-redshift-red selection:text-white">
 
             {/* Header */}
-
-            // ... inside Header ...
             <header className="flex flex-col md:flex-row justify-between items-center mb-12 gap-6">
                 <div className="flex items-center gap-4">
                     <Link href="/" className="group">
