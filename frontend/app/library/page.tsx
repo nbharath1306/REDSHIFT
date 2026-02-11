@@ -9,6 +9,7 @@ import Link from "next/link";
 import { motion, AnimatePresence } from "framer-motion";
 import { useSemanticSearch } from "@/hooks/useSemanticSearch";
 import { useRouter } from "next/navigation";
+import { StreakHUD } from "@/components/StreakHUD";
 
 export default function LibraryPage() {
     const router = useRouter();
@@ -46,6 +47,8 @@ export default function LibraryPage() {
         <div className="min-h-screen bg-black text-white p-6 md:p-12 font-sans selection:bg-redshift-red selection:text-white">
 
             {/* Header */}
+
+            // ... inside Header ...
             <header className="flex flex-col md:flex-row justify-between items-center mb-12 gap-6">
                 <div className="flex items-center gap-4">
                     <Link href="/" className="group">
@@ -57,6 +60,10 @@ export default function LibraryPage() {
                         <h1 className="text-4xl font-bold tracking-tighter">THE VAULT</h1>
                         <p className="text-[10px] text-redshift-red uppercase tracking-[0.3em] font-bold">Local Knowledge Repository</p>
                     </div>
+                </div>
+
+                <div className="hidden md:block">
+                    <StreakHUD />
                 </div>
 
                 <div className="flex gap-4 w-full md:w-auto">

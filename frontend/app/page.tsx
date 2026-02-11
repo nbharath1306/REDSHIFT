@@ -16,6 +16,7 @@ import { db } from "@/lib/db";
 import Link from "next/link";
 
 import { ReaderSettings } from "@/components/ReaderSettings"; // Import Type
+import { StreakHUD } from "@/components/StreakHUD";
 
 function ReaderContent() {
   const searchParams = useSearchParams();
@@ -199,6 +200,8 @@ function ReaderContent() {
           >
             {/* Header */}
             <header className="flex flex-col md:flex-row gap-8 items-center justify-between border-b border-white/10 pb-8 backdrop-blur-sm bg-black/20 rounded-xl p-6">
+
+              // ... inside Header ...
               <div className="flex items-center gap-4">
                 <div className="w-12 h-12 bg-redshift-red/90 rounded flex items-center justify-center shadow-[0_0_20px_rgba(255,49,49,0.4)]">
                   <Zap className="text-black fill-current w-6 h-6" />
@@ -209,6 +212,10 @@ function ReaderContent() {
                   </h1>
                   <p className="text-[10px] text-redshift-red tracking-[0.3em] uppercase font-bold">Cognitive Acceleration Engine</p>
                 </div>
+              </div>
+
+              <div className="hidden md:block">
+                <StreakHUD />
               </div>
 
               {/* Library Link */}
