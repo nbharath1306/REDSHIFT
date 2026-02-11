@@ -53,7 +53,10 @@ export const ReaderSettingsMenu: React.FC<ReaderSettingsMenuProps> = ({
 
                     {/* Zen Mode Toggle */}
                     <div className="flex items-center justify-between group">
-                        <label className="text-xs font-bold text-redshift-red uppercase tracking-widest group-hover:text-white transition-colors">Zen Mode</label>
+                        <div className="flex flex-col">
+                            <label className="text-xs font-bold text-redshift-red uppercase tracking-widest group-hover:text-white transition-colors">Zen Mode</label>
+                            <span className="text-[10px] text-gray-500 font-mono">Auto-hide controls</span>
+                        </div>
                         <button
                             onClick={() => handleChange('zenMode', !settings.zenMode)}
                             className={`w-12 h-6 rounded-full p-1 transition-all ${settings.zenMode ? 'bg-redshift-red shadow-[0_0_10px_#FF3131]' : 'bg-white/10'}`}
