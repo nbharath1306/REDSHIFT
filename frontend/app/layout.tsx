@@ -24,6 +24,10 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" className="dark">
+      <head>
+        <link rel="manifest" href="/manifest.json" />
+        <meta name="theme-color" content="#FF3131" />
+      </head>
       <body
         className={`${spaceGrotesk.variable} ${jetbrainsMono.variable} antialiased bg-black text-white`}
       >
