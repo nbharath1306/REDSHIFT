@@ -31,19 +31,31 @@ export interface KnowledgeNode {
     createdAt: number;
 }
 
+export interface Session {
+    id: string; // UUID
+    bookId: string;
+    startTime: number;
+    endTime: number;
+    durationSeconds: number; // Active reading time
+    wordsRead: number;
+    averageWpm: number;
+}
+
 // --- Database Class ---
 
 const db = new Dexie('RedshiftVault') as Dexie & {
     books: EntityTable<Book, 'id'>,
     progress: EntityTable<Progress, 'bookId'>,
-    knowledge: EntityTable<KnowledgeNode, 'id'>
+    knowledge: EntityTable<KnowledgeNode, 'id'>,
+    sessions: EntityTable<Session, 'id'>
 };
 
 // --- Schema Definition ---
-db.version(1).stores({
-    books: 'id, title, author, addedAt', // Indexed inputs
+db.version(2).stores({
+    books: 'id, title, author, addedAt',
     progress: 'bookId, lastReadAt',
-    knowledge: 'id, concept, *sourceBookIds' // Multi-index for search
+    knowledge: 'id, concept, *sourceBookIds',
+    sessions: 'id, bookId, startTime, endTime' // Indexed for stats
 });
 
 export { db };
