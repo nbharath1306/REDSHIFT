@@ -182,7 +182,6 @@ export default function ReaderCanvas({
                     <Settings2 className="w-6 h-6" />
                 </button>
 
-
                 <div className="flex items-center gap-8">
                     <button onClick={() => onSeek(false)} className="hover:bg-[#FF3131]/10 rounded-full w-16 h-16 flex items-center justify-center transition-colors">
                         <ChevronLeft className="w-10 h-10 text-white/70" />
@@ -208,13 +207,65 @@ export default function ReaderCanvas({
                 </button>
             </div>
 
+            {/* Exit Button - Always visible or toggleable */}
+            <div className={cn("absolute top-6 right-6 z-50 transition-opacity", showControls ? "opacity-100" : "opacity-0")}>
+                <button
+                    onClick={onExit}
+                    className="p-2 rounded-full bg-black/50 hover:bg-red-500 hover:text-white border border-white/10 transition-all group"
+                >
+                    <X className="w-6 h-6 text-gray-400 group-hover:text-white" />
+                </button>
+            </div>
+
             {/* Paused Overlay */}
-            {!isPlaying && !isSettingsOpen && (
+            {!isPlaying && !isSettingsOpen && currentIndex < totalWords - 1 && (
                 <div className="absolute inset-0 flex items-center justify-center pointer-events-none z-30">
                     <div className="w-full h-full bg-black/20 backdrop-blur-sm absolute" />
                     <div className="text-[12vw] font-black text-white/10 uppercase tracking-[0.2em] relative">
                         PAUSED
                     </div>
+                </div>
+            )}
+
+            {/* Completion Overlay */}
+            {!isPlaying && currentIndex >= totalWords - 1 && (
+                <div className="absolute inset-0 flex flex-col items-center justify-center z-40 bg-black/80 backdrop-blur-md">
+                    <motion.div
+                        initial={{ scale: 0.9, opacity: 0 }}
+                        animate={{ scale: 1, opacity: 1 }}
+                        className="text-center space-y-8"
+                    >
+                        <h2 className="text-4xl md:text-6xl font-black text-white tracking-tighter">
+                            READING <span className="text-red-500">COMPLETE</span>
+                        </h2>
+
+                        <div className="flex items-center justify-center gap-8 text-gray-400 font-mono uppercase tracking-widest text-sm">
+                            <div className="flex flex-col items-center gap-1">
+                                <span className="text-2xl text-white font-bold">{wpmConfig}</span>
+                                <span>WPM</span>
+                            </div>
+                            <div className="flex flex-col items-center gap-1">
+                                <span className="text-2xl text-white font-bold">{totalWords}</span>
+                                <span>WORDS</span>
+                            </div>
+                        </div>
+
+                        <div className="flex gap-4 justify-center">
+                            <button
+                                onClick={onRestart}
+                                className="px-8 py-3 bg-white/10 hover:bg-white/20 text-white rounded-lg font-bold uppercase tracking-widest transition-all flex items-center gap-2"
+                            >
+                                <RotateCcw className="w-4 h-4" />
+                                Replay
+                            </button>
+                            <button
+                                onClick={onExit}
+                                className="px-8 py-3 bg-red-600 hover:bg-red-500 text-white rounded-lg font-bold uppercase tracking-widest transition-all shadow-[0_0_20px_rgba(255,49,49,0.4)]"
+                            >
+                                Finish
+                            </button>
+                        </div>
+                    </motion.div>
                 </div>
             )}
 
