@@ -109,9 +109,34 @@ export default function ReaderCanvas({
             onMouseMove={handleMouseMove}
             onClick={handleMouseMove}
         >
-            {/* ... HUD Layers ... */}
+            {/* Progress Bar - Top Edge (Psychological Completion Anchor) */}
+            <div className="absolute top-0 left-0 right-0 h-1 bg-white/10 z-50">
+                <motion.div
+                    className="h-full bg-[#FF3131] shadow-[0_0_15px_#FF3131]"
+                    initial={{ width: 0 }}
+                    animate={{ width: `${progress * 100}%` }}
+                    transition={{ ease: "linear", duration: 0.1 }}
+                />
+            </div>
 
-            {/* Top/Bottom Bars ... */}
+            {/* Paused Notification - Clean, No Blur */}
+            {!isPlaying && !isSettingsOpen && currentIndex < totalWords - 1 && (
+                <div className="absolute inset-0 flex items-center justify-center pointer-events-none z-30">
+                    <motion.div
+                        initial={{ opacity: 0, y: 10 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        className="px-6 py-3 bg-black/80 border border-[#FF3131]/30 rounded-full shadow-[0_0_20px_rgba(255,49,49,0.2)] flex items-center gap-3"
+                    >
+                        <div className="w-2 h-2 bg-[#FF3131] rounded-full animate-pulse" />
+                        <span className="text-xs md:text-sm font-mono text-white font-bold tracking-[0.2em] uppercase">
+                            System Paused
+                        </span>
+                        <span className="text-xs font-mono text-gray-500 border-l border-white/20 pl-3">
+                            {Math.round(progress * 100)}% COMPLETE
+                        </span>
+                    </motion.div>
+                </div>
+            )}
 
             {/* Main Canvas (Centered) */}
             <div className="flex-1 flex flex-col items-center justify-center relative z-10">
@@ -217,15 +242,7 @@ export default function ReaderCanvas({
                 </button>
             </div>
 
-            {/* Paused Overlay */}
-            {!isPlaying && !isSettingsOpen && currentIndex < totalWords - 1 && (
-                <div className="absolute inset-0 flex items-center justify-center pointer-events-none z-30">
-                    <div className="w-full h-full bg-black/20 backdrop-blur-sm absolute" />
-                    <div className="text-[12vw] font-black text-white/10 uppercase tracking-[0.2em] relative">
-                        PAUSED
-                    </div>
-                </div>
-            )}
+
 
             {/* Completion Overlay */}
             {!isPlaying && currentIndex >= totalWords - 1 && (
