@@ -17,6 +17,8 @@ import Link from "next/link";
 
 import { ReaderSettings } from "@/components/ReaderSettings"; // Import Type
 import { StreakHUD } from "@/components/StreakHUD";
+import { LevelUpModal } from "@/components/LevelUpModal";
+import { useRef } from "react";
 
 function ReaderContent() {
   const searchParams = useSearchParams();
@@ -138,6 +140,39 @@ function ReaderContent() {
       reader.readAsText(file);
     }
   };
+
+  // Level Up State
+  const [showLevelUp, setShowLevelUp] = useState(false);
+  const [newLevel, setNewLevel] = useState(0);
+  const [newRank, setNewRank] = useState("");
+  const initialLevelRef = useRef<number | null>(null);
+
+  // Check initial level on mount
+  useEffect(() => {
+    import("@/lib/gamification").then(({ getGamificationStats }) => {
+      getGamificationStats().then(stats => {
+        initialLevelRef.current = stats.level;
+      });
+    });
+  }, []);
+
+  // Check for Level Up when session ends (isPlaying goes to false)
+  useEffect(() => {
+    if (!isPlaying && initialLevelRef.current !== null) {
+      import("@/lib/gamification").then(({ getGamificationStats }) => {
+        setTimeout(() => { // Slight delay to ensure DB write
+          getGamificationStats().then(stats => {
+            if (stats.level > initialLevelRef.current!) {
+              setNewLevel(stats.level);
+              setNewRank(stats.rank);
+              setShowLevelUp(true);
+              initialLevelRef.current = stats.level; // Update ref
+            }
+          });
+        }, 1000);
+      });
+    }
+  }, [isPlaying]);
 
   const handleIngest = () => {
     if (!text.trim()) return;
@@ -444,6 +479,12 @@ function ReaderContent() {
           </motion.main>
         )}
       </AnimatePresence>
+      <LevelUpModal
+        show={showLevelUp}
+        level={newLevel}
+        rank={newRank}
+        onClose={() => setShowLevelUp(false)}
+      />
     </div>
   );
 }
