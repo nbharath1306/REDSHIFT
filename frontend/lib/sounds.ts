@@ -10,6 +10,7 @@ class SoundManager {
     }
 
     playLevelUp() {
+        if (localStorage.getItem('redshift_sound_enabled') === 'false') return;
         this.init();
         if (!this.ctx) return;
 
@@ -23,6 +24,7 @@ class SoundManager {
     }
 
     playStreakKeep() {
+        if (localStorage.getItem('redshift_sound_enabled') === 'false') return;
         this.init();
         if (!this.ctx) return;
         const now = this.ctx.currentTime;

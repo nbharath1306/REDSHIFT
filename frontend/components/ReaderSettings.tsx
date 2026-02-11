@@ -9,6 +9,7 @@ export interface ReaderSettings {
     guideAxis: 'none' | 'horizontal' | 'vertical' | 'crosshair';
     guideOpacity: number;
     zenMode: boolean; // Auto-hide controls
+    soundEnabled: boolean;
 }
 
 interface ReaderSettingsMenuProps {
@@ -28,6 +29,9 @@ export const ReaderSettingsMenu: React.FC<ReaderSettingsMenuProps> = ({
 
     const handleChange = (key: keyof ReaderSettings, value: string | number | boolean) => {
         onUpdate({ ...settings, [key]: value });
+        if (key === 'soundEnabled') {
+            localStorage.setItem('redshift_sound_enabled', String(value));
+        }
     };
 
     return (
@@ -62,6 +66,20 @@ export const ReaderSettingsMenu: React.FC<ReaderSettingsMenuProps> = ({
                             className={`w-12 h-6 rounded-full p-1 transition-all ${settings.zenMode ? 'bg-redshift-red shadow-[0_0_10px_#FF3131]' : 'bg-white/10'}`}
                         >
                             <div className={`w-4 h-4 rounded-full bg-white transition-all ${settings.zenMode ? 'translate-x-6' : 'translate-x-0'}`} />
+                        </button>
+                    </div>
+
+                    {/* Sound Toggle */}
+                    <div className="flex items-center justify-between group">
+                        <div className="flex flex-col">
+                            <label className="text-xs font-bold text-redshift-red uppercase tracking-widest group-hover:text-white transition-colors">Audio Feedback</label>
+                            <span className="text-[10px] text-gray-500 font-mono">Enable SFX</span>
+                        </div>
+                        <button
+                            onClick={() => handleChange('soundEnabled', !settings.soundEnabled)}
+                            className={`w-12 h-6 rounded-full p-1 transition-all ${settings.soundEnabled ? 'bg-redshift-red shadow-[0_0_10px_#FF3131]' : 'bg-white/10'}`}
+                        >
+                            <div className={`w-4 h-4 rounded-full bg-white transition-all ${settings.soundEnabled ? 'translate-x-6' : 'translate-x-0'}`} />
                         </button>
                     </div>
 

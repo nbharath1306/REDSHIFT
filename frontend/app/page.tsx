@@ -53,7 +53,8 @@ function ReaderContent() {
     fontSize: 6,
     guideAxis: 'horizontal',
     guideOpacity: 0.5,
-    zenMode: true
+    zenMode: true,
+    soundEnabled: true
   });
 
   // New State for Source Modes
